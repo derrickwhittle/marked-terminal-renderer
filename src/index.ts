@@ -16,5 +16,7 @@ export default function (opts?: Partial<CliRendererOptions>): MarkedExtension {
       ? { ...LIGHT, ...opts }
       : { ...DARK, ...opts }
     : DARK;
-  return { renderer: asPlain(new CliRenderer(options)) };
+  return {
+    renderer: asPlain(new CliRenderer(options))
+  };
 }

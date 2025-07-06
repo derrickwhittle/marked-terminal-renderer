@@ -16,11 +16,41 @@ export const pipe =
  * Convert CliRenderer class to plain object
  * @param r
  */
-export const asPlain = (r: CliRenderer) =>
-  Reflect.ownKeys(CliRenderer.prototype).reduce(
-    (obj, key) => ({ ...obj, [key]: r[key].bind(r) }),
-    {}
-  );
+export const asPlain = (r: CliRenderer) => {
+  // Only include the renderer methods that marked expects
+  const rendererMethods = [
+    'checkbox',
+    'strong',
+    'em',
+    'codespan',
+    'br',
+    'del',
+    'link',
+    'image',
+    'text',
+    'code',
+    'blockquote',
+    'heading',
+    'hr',
+    'paragraph',
+    'html',
+    'list',
+    'listitem',
+    'table',
+    'tablerow',
+    'tablecell'
+  ];
+
+  const obj = {};
+
+  rendererMethods.forEach(method => {
+    if (typeof r[method] === 'function') {
+      obj[method] = r[method].bind(r);
+    }
+  });
+
+  return obj;
+};
 
 const comma = item => `${item},`;
 const strip = item => item.substring(0, item.length - 1);
