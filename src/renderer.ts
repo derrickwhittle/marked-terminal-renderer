@@ -52,6 +52,18 @@ export class CliRenderer extends Renderer {
             return this.br();
           case 'list':
             return this.list(token);
+          case 'code':
+            return this.code(token);
+          case 'blockquote':
+            return this.blockquote(token);
+          case 'paragraph':
+            return this.paragraph(token);
+          case 'heading':
+            return this.heading(token);
+          case 'hr':
+            return this.hr();
+          case 'space':
+            return ''; // Space tokens should not render anything
           default:
             return token.text || token.raw || '';
         }
