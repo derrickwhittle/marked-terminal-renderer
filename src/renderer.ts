@@ -172,7 +172,7 @@ export class CliRenderer extends Renderer {
   heading({ tokens, depth }: { tokens: any[]; depth: number }): string {
     const { headingLevels, headingStyle, lineLength, indent } = this.opts;
     const text = this.parseTokens(tokens);
-    const levelStyle = chalk.hex(headingLevels[(depth as HeadingLevel) - 1]);
+    const levelStyle = chalk.hex(headingLevels[depth - 1]);
     const wrapperFn = wrapper({ width: lineLength, indent });
     return pipe(levelStyle, headingStyle, wrapperFn, block)(text);
   }
