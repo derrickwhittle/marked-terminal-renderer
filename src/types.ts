@@ -1,4 +1,4 @@
-import { Chalk } from 'chalk';
+import { ChalkInstance } from 'chalk';
 
 export interface CliRendererOptions {
   // terminal
@@ -7,38 +7,38 @@ export interface CliRendererOptions {
   mode?: 'dark' | 'light';
 
   // text
-  strongStyle: Chalk;
-  emStyle: Chalk;
-  delStyle: Chalk;
+  strongStyle: ChalkInstance;
+  emStyle: ChalkInstance;
+  delStyle: ChalkInstance;
 
   // heading
   headingLevels: string[];
-  headingStyle: Chalk;
+  headingStyle: ChalkInstance;
 
   // code
-  codeStyle: Chalk;
-  codeInfoStyle: Chalk;
+  codeStyle: ChalkInstance;
+  codeInfoStyle: ChalkInstance;
 
   // block-quote
   quotePadding: number;
   quoteChar: string;
-  quoteStyle: Chalk;
+  quoteStyle: ChalkInstance;
 
   // hr
   hrChar: string;
-  hrStyle: Chalk;
+  hrStyle: ChalkInstance;
 
   // lists
-  listStyle: Chalk;
+  listStyle: ChalkInstance;
   listChar: string;
 
   // checkbox
   cbCheckedChar: string;
   cbUncheckedChar: string;
-  cbStyle: Chalk;
+  cbStyle: ChalkInstance;
 
   // link
-  linkStyle: Chalk;
+  linkStyle: ChalkInstance;
 
   // table
   // todo complete options
