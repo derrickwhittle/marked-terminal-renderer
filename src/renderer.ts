@@ -29,6 +29,34 @@ export class CliRenderer extends Renderer {
     super();
   }
 
+  // Helper method to parse tokens recursively
+  private parseTokens(tokens: any[]): string {
+    return tokens
+      .map(token => {
+        switch (token.type) {
+          case 'text':
+            return token.text;
+          case 'strong':
+            return this.strong(token);
+          case 'em':
+            return this.em(token);
+          case 'codespan':
+            return this.codespan(token);
+          case 'del':
+            return this.del(token);
+          case 'link':
+            return this.link(token);
+          case 'image':
+            return this.image(token);
+          case 'br':
+            return this.br();
+          default:
+            return token.text || token.raw || '';
+        }
+      })
+      .join('');
+  }
+
   // INLINE
 
   checkbox({ checked }: { checked: boolean }): string {
@@ -55,7 +83,7 @@ export class CliRenderer extends Renderer {
   }
 
   del({ tokens }: { tokens: any[] }): string {
-    const text = tokens.map(token => token.raw || token.text || '').join('');
+    const text = this.parseTokens(tokens);
     return this.opts.delStyle(text);
   }
 
@@ -70,7 +98,7 @@ export class CliRenderer extends Renderer {
   }): string {
     // todo need to be refactor
     const { linkStyle } = this.opts;
-    const text = tokens.map(token => token.raw || token.text || '').join('');
+    const text = this.parseTokens(tokens);
     // if (supportsHyperlinks.stout || true) {
     //     return hyperLinker(linkStyle(text), href);
     // }
@@ -121,7 +149,7 @@ export class CliRenderer extends Renderer {
 
   blockquote({ tokens }: { tokens: any[] }) {
     const { quotePadding, quoteChar, quoteStyle } = this.opts;
-    const quote = tokens.map(token => token.raw || token.text || '').join('');
+    const quote = this.parseTokens(tokens);
     const mapper = line =>
       quoteStyle(SEP.repeat(quotePadding) + quoteChar + SEP + line);
     return block(lines(quote.trim(), mapper));
@@ -129,7 +157,7 @@ export class CliRenderer extends Renderer {
 
   heading({ tokens, depth }: { tokens: any[]; depth: number }): string {
     const { headingLevels, headingStyle, lineLength, indent } = this.opts;
-    const text = tokens.map(token => token.raw || token.text || '').join('');
+    const text = this.parseTokens(tokens);
     const levelStyle = chalk.hex(headingLevels[(depth as HeadingLevel) - 1]);
     const wrapperFn = wrapper({ width: lineLength, indent });
     return pipe(levelStyle, headingStyle, wrapperFn, block)(text);
@@ -141,7 +169,7 @@ export class CliRenderer extends Renderer {
   }
 
   paragraph({ tokens }: { tokens: any[] }): string {
-    const text = tokens.map(token => token.raw || token.text || '').join('');
+    const text = this.parseTokens(tokens);
     const { lineLength, indent } = this.opts;
     const wrapperFn = wrapper({ width: lineLength, indent });
     return block(wrapperFn(text));
@@ -168,9 +196,7 @@ export class CliRenderer extends Renderer {
   }
 
   listitem(item: { tokens: any[] }): string {
-    const text = item.tokens
-      .map(token => token.raw || token.text || '')
-      .join('');
+    const text = this.parseTokens(item.tokens);
     const mapper = (line, index) =>
       index === 0 ? `${LI} ${line}` : `  ${line}`;
     return text.split(EOL).filter(NOT_EMPTY).map(mapper).join(EOL).trim() + EOL;
@@ -207,9 +233,7 @@ export class CliRenderer extends Renderer {
     header?: boolean;
     align?: 'center' | 'left' | 'right' | null;
   }): string {
-    const content = token.tokens
-      .map(token => token.raw || token.text || '')
-      .join('');
+    const content = this.parseTokens(token.tokens);
     return asObject(content);
   }
 
