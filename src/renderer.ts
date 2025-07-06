@@ -50,6 +50,8 @@ export class CliRenderer extends Renderer {
             return this.image(token);
           case 'br':
             return this.br();
+          case 'list':
+            return this.list(token);
           default:
             return token.text || token.raw || '';
         }
