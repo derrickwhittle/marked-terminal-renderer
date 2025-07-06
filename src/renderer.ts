@@ -1,10 +1,10 @@
-import { chalk, highlight, Renderer, Table } from './deps';
+import { chalk, highlight, Renderer, Table } from './deps.js';
 import {
   CellFlags,
   CliRendererOptions,
   HeadingLevel,
   InfoString
-} from './types';
+} from './types.js';
 import {
   asArray,
   asObject,
@@ -13,7 +13,7 @@ import {
   pipe,
   textify,
   wrapper
-} from './utils';
+} from './utils.js';
 
 const SEP = ' '; // separator
 const EOL = '\n'; // end of line

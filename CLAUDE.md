@@ -9,7 +9,7 @@ This is a terminal renderer extension for [marked](https://github.com/markedjs/m
 ## Key Commands
 
 ### Development
-- `npm run build` - Build the project (TypeScript compilation + Rollup bundling)
+- `npm run build` - Build the project (TypeScript compilation to ESM)
 - `npm run test` - Run Jest tests
 - `npm run test:cover` - Run tests with coverage
 - `npm run lint` - Run ESLint on TypeScript files
@@ -41,12 +41,24 @@ The project follows a modular architecture:
 
 The extension supports light and dark modes with extensive customization options defined in `CliRendererOptions`. The default mode is dark, configured in `src/defaults.ts`.
 
+## Module System
+
+This project is now a **pure ESM package**:
+- Uses `"type": "module"` in package.json
+- All relative imports require `.js` extensions (even in TypeScript)
+- Compatible with Node.js 20+ (required by marked@16)
+- Examples use `import.meta.url` instead of `__dirname`
+
 ## Build Process
 
-- TypeScript compilation to `lib/` directory
-- Rollup bundling for ESM output
-- Configured via `tsconfig.json` and `rollup.config.esm.js`
+- TypeScript compilation to `lib/` directory with ES2020 modules
+- Direct ESM output without bundling
+- Configured via `tsconfig.json` with `esModuleInterop` and `allowSyntheticDefaultImports`
 
 ## Testing
 
-Uses Jest with TypeScript support (`ts-jest` preset). Test files follow the pattern `*.spec.ts` and are located alongside source files in `src/`.
+Uses Jest with ESM support:
+- `ts-jest/presets/default-esm` preset for ESM compatibility
+- Maps `.js` imports to `.ts` files during testing
+- Uses UMD build of marked for Jest compatibility
+- Test files follow the pattern `*.spec.ts` and are located alongside source files in `src/`

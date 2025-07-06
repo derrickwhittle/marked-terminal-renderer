@@ -1,5 +1,5 @@
-import { emojify, IOptions, wrap } from './deps';
-import { CliRenderer } from './renderer';
+import { emojify, IOptions, wrap } from './deps.js';
+import { CliRenderer } from './renderer.js';
 
 // helpers
 

@@ -2,7 +2,13 @@
   "name": "marked-terminal-renderer",
   "version": "1.1.5",
   "description": "marked terminal renderer",
+  "type": "module",
   "main": "lib/index.js",
+  "module": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
   "files": [
     "lib"
   ],
@@ -20,7 +26,7 @@
     "test:cover": "jest --coverage --testPathPattern=src/.*\\.spec\\.ts$",
     "format": "eslint --fix src/*.ts && prettier --write src/*.ts",
     "lint": "eslint src/*.ts",
-    "build": "rm -rf lib && tsc && rollup -c rollup.config.esm.js",
+    "build": "rm -rf lib && tsc",
     "prepare": "npm run build"
   },
   "repository": {
@@ -38,9 +44,6 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.15.0",
-    "@rollup/plugin-commonjs": "^20.0.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.0.4",
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/commit-analyzer": "^8.0.1",
     "@semantic-release/git": "^9.0.0",
@@ -59,7 +62,6 @@
     "jest-cli": "^27.0.4",
     "marked": "^16.0.0",
     "prettier": "^2.3.2",
-    "rollup": "^2.53.1",
     "semantic-release": "^17.4.4",
     "ts-jest": "^27.0.5",
     "tslib": "^2.3.1",
@@ -73,9 +75,17 @@
     "word-wrap": "^1.2.3"
   },
   "jest": {
-    "preset": "ts-jest",
+    "preset": "ts-jest/presets/default-esm",
     "testEnvironment": "node",
+    "extensionsToTreatAsEsm": [".ts"],
+    "globals": {
+      "ts-jest": {
+        "useESM": true
+      }
+    },
+    "testMatch": ["**/src/**/*.spec.ts"],
     "moduleNameMapper": {
+      "^(\\.\\.?\\/.+)\\.js$": "$1",
       "^marked$": "<rootDir>/node_modules/marked/lib/marked.umd.js"
     }
   },

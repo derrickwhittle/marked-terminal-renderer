@@ -1,5 +1,5 @@
-import { chalk } from './deps';
-import { CliRendererOptions } from './types';
+import { chalk } from './deps.js';
+import { CliRendererOptions } from './types.js';
 
 export const COMMON: Partial<CliRendererOptions> = {
   lineLength: 80,

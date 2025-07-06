@@ -1,10 +1,10 @@
-import { CliRendererOptions } from './types';
-import { MarkedExtension } from './deps';
-import { CliRenderer } from './renderer';
-import { DARK, LIGHT } from './defaults';
-import { asPlain } from './utils';
+import { CliRendererOptions } from './types.js';
+import { MarkedExtension } from './deps.js';
+import { CliRenderer } from './renderer.js';
+import { DARK, LIGHT } from './defaults.js';
+import { asPlain } from './utils.js';
 
-export * from './types';
+export * from './types.js';
 
 // the default mode is dark
 // this extension expose renderer only

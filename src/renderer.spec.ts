@@ -1,5 +1,5 @@
-import { CliRenderer } from './renderer';
-import { DARK } from './defaults';
+import { CliRenderer } from './renderer.js';
+import { DARK } from './defaults.js';
 
 describe('renderer', () => {
   it('should create a cli renderer', () => {

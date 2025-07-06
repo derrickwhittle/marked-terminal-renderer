@@ -1,5 +1,5 @@
 import { marked } from 'marked';
-import terminalRenderer from './index';
+import terminalRenderer from './index.js';
 
 describe('marked-terminal-renderer', () => {
   marked.use(terminalRenderer());

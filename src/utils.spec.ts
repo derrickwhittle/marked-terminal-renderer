@@ -1,6 +1,6 @@
-import { asPlain, pipe } from './utils';
-import { CliRenderer } from './renderer';
-import { DARK } from './defaults';
+import { asPlain, pipe } from './utils.js';
+import { CliRenderer } from './renderer.js';
+import { DARK } from './defaults.js';
 
 describe('utils', () => {
   describe('pipe', () => {

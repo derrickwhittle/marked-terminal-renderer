@@ -1,5 +1,5 @@
 // ESM example
-import terminalRenderer from '../lib/index.mjs';
+import terminalRenderer from '../lib/index.js';
 import { marked } from 'marked';
 import { readFileSync } from 'fs';
 

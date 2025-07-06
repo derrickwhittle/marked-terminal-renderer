@@ -1,11 +1,10 @@
-import { Chalk } from 'chalk';
-import * as chalk from 'chalk';
-import * as Table from 'cli-table3';
-import * as wrap from 'word-wrap';
-import { IOptions } from 'word-wrap';
-import highlight from 'cli-highlight';
+import chalk, { Chalk } from 'chalk';
+import Table from 'cli-table3';
+import wrap, { IOptions } from 'word-wrap';
+import { highlight } from 'cli-highlight';
 import { Renderer, MarkedExtension } from 'marked';
-import { emojify } from 'node-emoji';
+import nodeEmoji from 'node-emoji';
+const { emojify } = nodeEmoji;
 export {
   Chalk,
   chalk,
