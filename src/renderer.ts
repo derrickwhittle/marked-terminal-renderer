@@ -40,9 +40,13 @@ export class CliRenderer extends Renderer {
         if (!this.isRendererToken(token)) {
           return token.raw || '';
         }
-        
+
         switch (token.type) {
           case 'text':
+            // If text token has nested tokens, parse them recursively
+            if ('tokens' in token && token.tokens && token.tokens.length > 0) {
+              return this.parseTokens(token.tokens);
+            }
             return token.text;
           case 'strong':
             return this.strong(token);
@@ -79,9 +83,23 @@ export class CliRenderer extends Renderer {
 
   // Type guard to check if token is a renderer token
   private isRendererToken(token: Token): token is RendererToken {
-    return ['text', 'strong', 'em', 'del', 'codespan', 'br', 'link', 'image', 
-            'code', 'blockquote', 'paragraph', 'heading', 'hr', 'space', 'list']
-           .includes(token.type);
+    return [
+      'text',
+      'strong',
+      'em',
+      'del',
+      'codespan',
+      'br',
+      'link',
+      'image',
+      'code',
+      'blockquote',
+      'paragraph',
+      'heading',
+      'hr',
+      'space',
+      'list'
+    ].includes(token.type);
   }
 
   // INLINE
