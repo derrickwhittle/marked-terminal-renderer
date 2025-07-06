@@ -65,12 +65,12 @@ export class CliRenderer extends Renderer {
   }
 
   strong({ tokens }: { tokens: any[] }): string {
-    const text = tokens.map(token => token.raw || token.text || '').join('');
+    const text = this.parseTokens(tokens);
     return this.opts.strongStyle(text);
   }
 
   em({ tokens }: { tokens: any[] }): string {
-    const text = tokens.map(token => token.raw || token.text || '').join('');
+    const text = this.parseTokens(tokens);
     return this.opts.emStyle(text);
   }
 
