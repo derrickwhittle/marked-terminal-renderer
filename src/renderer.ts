@@ -3,7 +3,10 @@ import {
   CellFlags,
   CliRendererOptions,
   HeadingLevel,
-  InfoString
+  InfoString,
+  Token,
+  Tokens,
+  RendererToken
 } from './types.js';
 import {
   asArray,
@@ -18,10 +21,10 @@ import {
 const SEP = ' '; // separator
 const EOL = '\n'; // end of line
 const LI = '྿'; // list character
-const NOT_EMPTY = flag => !!flag;
+const NOT_EMPTY = (flag: string): boolean => !!flag;
 
-const block = text => EOL + text + EOL;
-const lines = (text: string, mapper: (s) => string) =>
+const block = (text: string): string => EOL + text + EOL;
+const lines = (text: string, mapper: (s: string) => string): string =>
   text.split(EOL).map(mapper).join(EOL) + EOL;
 
 export class CliRenderer extends Renderer {
@@ -30,9 +33,14 @@ export class CliRenderer extends Renderer {
   }
 
   // Helper method to parse tokens recursively
-  private parseTokens(tokens: any[]): string {
+  private parseTokens(tokens: Token[]): string {
     return tokens
       .map(token => {
+        // Filter to only handle tokens we know how to render
+        if (!this.isRendererToken(token)) {
+          return token.raw || '';
+        }
+        
         switch (token.type) {
           case 'text':
             return token.text;
@@ -64,31 +72,36 @@ export class CliRenderer extends Renderer {
             return this.hr();
           case 'space':
             return ''; // Space tokens should not render anything
-          default:
-            return token.text || token.raw || '';
         }
       })
       .join('');
   }
 
+  // Type guard to check if token is a renderer token
+  private isRendererToken(token: Token): token is RendererToken {
+    return ['text', 'strong', 'em', 'del', 'codespan', 'br', 'link', 'image', 
+            'code', 'blockquote', 'paragraph', 'heading', 'hr', 'space', 'list']
+           .includes(token.type);
+  }
+
   // INLINE
 
-  checkbox({ checked }: { checked: boolean }): string {
+  checkbox({ checked }: Tokens.Checkbox): string {
     const { cbStyle, cbUncheckedChar, cbCheckedChar } = this.opts;
     return cbStyle(checked ? cbCheckedChar : cbUncheckedChar) + SEP;
   }
 
-  strong({ tokens }: { tokens: any[] }): string {
+  strong({ tokens }: Tokens.Strong): string {
     const text = this.parseTokens(tokens);
     return this.opts.strongStyle(text);
   }
 
-  em({ tokens }: { tokens: any[] }): string {
+  em({ tokens }: Tokens.Em): string {
     const text = this.parseTokens(tokens);
     return this.opts.emStyle(text);
   }
 
-  codespan({ text }: { text: string }): string {
+  codespan({ text }: Tokens.Codespan): string {
     return this.opts.emStyle(this.opts.codeStyle(text));
   }
 
@@ -96,20 +109,12 @@ export class CliRenderer extends Renderer {
     return EOL;
   }
 
-  del({ tokens }: { tokens: any[] }): string {
+  del({ tokens }: Tokens.Del): string {
     const text = this.parseTokens(tokens);
     return this.opts.delStyle(text);
   }
 
-  link({
-    href,
-    title,
-    tokens
-  }: {
-    href: string | null;
-    title?: string | null;
-    tokens: any[];
-  }): string {
+  link({ href, title, tokens }: Tokens.Link): string {
     // todo need to be refactor
     const { linkStyle } = this.opts;
     const text = this.parseTokens(tokens);
@@ -119,38 +124,22 @@ export class CliRenderer extends Renderer {
     return href === text ? linkStyle(href) : `${text}(${linkStyle(href)})`;
   }
 
-  image({
-    href,
-    title,
-    text
-  }: {
-    href: string | null;
-    title: string | null;
-    text: string;
-  }): string {
+  image({ href, title, text }: Tokens.Image): string {
     // no image support in terminal
     return '🌆';
   }
 
-  text(token: { text: string }): string {
+  text({ text }: Tokens.Text): string {
     // todo do we need the wrapper here?
-    return textify()(token.text);
+    return textify()(text);
     // return textify(this.wrapper)(text);
   }
 
   // BLOCK
 
-  code({
-    text,
-    lang,
-    escaped
-  }: {
-    text: string;
-    lang?: string;
-    escaped?: boolean;
-  }): string {
+  code({ text, lang, escaped }: Tokens.Code): string {
     const { lineLength, codeStyle, codeInfoStyle } = this.opts;
-    const mapper = line =>
+    const mapper = (line: string) =>
       SEP + codeStyle((SEP + line).padEnd(lineLength - 2, SEP));
     const rendered = lines(block(text.trim()), mapper);
     return lang
@@ -161,15 +150,15 @@ export class CliRenderer extends Renderer {
       : rendered;
   }
 
-  blockquote({ tokens }: { tokens: any[] }) {
+  blockquote({ tokens }: Tokens.Blockquote): string {
     const { quotePadding, quoteChar, quoteStyle } = this.opts;
     const quote = this.parseTokens(tokens);
-    const mapper = line =>
+    const mapper = (line: string) =>
       quoteStyle(SEP.repeat(quotePadding) + quoteChar + SEP + line);
     return block(lines(quote.trim(), mapper));
   }
 
-  heading({ tokens, depth }: { tokens: any[]; depth: number }): string {
+  heading({ tokens, depth }: Tokens.Heading): string {
     const { headingLevels, headingStyle, lineLength, indent } = this.opts;
     const text = this.parseTokens(tokens);
     const levelStyle = chalk.hex(headingLevels[depth - 1]);
@@ -182,7 +171,7 @@ export class CliRenderer extends Renderer {
     return block(SEP + hrStyle(hrChar.repeat(lineLength - 2)) + SEP);
   }
 
-  paragraph({ tokens }: { tokens: any[] }): string {
+  paragraph({ tokens }: Tokens.Paragraph): string {
     const text = this.parseTokens(tokens);
     const { lineLength, indent } = this.opts;
     const wrapperFn = wrapper({ width: lineLength, indent });
@@ -195,36 +184,32 @@ export class CliRenderer extends Renderer {
     return block(chalk.redBright('HTML not implemented'));
   }
 
-  list(token: {
-    items: any[];
-    ordered: boolean;
-    start: number | string;
-  }): string {
+  list({ items, ordered, start }: Tokens.List): string {
     const { listChar, listStyle } = this.opts;
-    const body = token.items.map(item => this.listitem(item)).join('');
-    let start = typeof token.start === 'number' ? token.start : 1;
-    const mapper = token.ordered
-      ? line => SEP + line.replace(LI, listStyle(start++))
-      : line => SEP + line.replace(LI, listStyle(listChar));
+    const body = items.map(item => this.listitem(item)).join('');
+    let startNum = typeof start === 'number' ? start : 1;
+    const mapper = ordered
+      ? (line: string) => SEP + line.replace(LI, listStyle(startNum++))
+      : (line: string) => SEP + line.replace(LI, listStyle(listChar));
     return EOL + body.split(EOL).filter(NOT_EMPTY).map(mapper).join(EOL) + EOL;
   }
 
-  listitem(item: { tokens: any[] }): string {
-    const text = this.parseTokens(item.tokens);
-    const mapper = (line, index) =>
+  listitem({ tokens }: Tokens.ListItem): string {
+    const text = this.parseTokens(tokens);
+    const mapper = (line: string, index: number) =>
       index === 0 ? `${LI} ${line}` : `  ${line}`;
     return text.split(EOL).filter(NOT_EMPTY).map(mapper).join(EOL).trim() + EOL;
   }
 
-  table(token: { header: any[]; rows: any[][] }): string {
+  table({ header, rows }: Tokens.Table): string {
     const { lineLength, tableWordWrap: wordWrap } = this.opts;
 
-    const head = token.header.map(cell => this.tablecell(cell));
-    const rows = token.rows.map(row => row.map(cell => this.tablecell(cell)));
+    const head = header.map(cell => this.tablecell(cell));
+    const tableRows = rows.map(row => row.map(cell => this.tablecell(cell)));
 
     // create table with no columns restrictions
     let table = new Table({ head, wordWrap });
-    table.push(...rows);
+    table.push(...tableRows);
     const output = table.toString();
     const length = output.search(EOL);
     if (length <= lineLength) {
@@ -234,7 +219,7 @@ export class CliRenderer extends Renderer {
     // re-create table with normalized columns
     const width = Math.ceil(lineLength / head.length);
     table = new Table({ head, wordWrap, colWidths: head.map(() => width) });
-    table.push(...rows);
+    table.push(...tableRows);
     return table.toString() + EOL;
   }
 
@@ -242,12 +227,8 @@ export class CliRenderer extends Renderer {
     return asArray(text);
   }
 
-  tablecell(token: {
-    tokens: any[];
-    header?: boolean;
-    align?: 'center' | 'left' | 'right' | null;
-  }): string {
-    const content = this.parseTokens(token.tokens);
+  tablecell({ tokens }: Tokens.TableCell): string {
+    const content = this.parseTokens(tokens);
     return asObject(content);
   }
 
